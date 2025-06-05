@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>点击特效</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#8B5CF6',
+                        accent: '#EC4899',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .glow {
+                filter: drop-shadow(0 0 8px rgba(79, 70, 229, 0.8));
+            }
+            .animate-pulse-slow {
+                animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            }
+            .animate-shine {
+                animation: shine 0.6s ease-out forwards;
+            }
+            @keyframes shine {
+                0% {
+                    transform: scale(0);
+                    opacity: 0.8;
+                }
+                50% {
+                    transform: scale(1.5);
+                    opacity: 0.6;
+                }
+                100% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen overflow-hidden">
+    <div class="fixed inset-0 bg-gradient-to-br from-gray-900 to-gray-800 z-0"></div>
+    
+    <!-- 页面标题 -->
+    <header class="fixed top-0 left-0 right-0 z-10 bg-gray-900/80 backdrop-blur-md border-b border-gray-800">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
+                点击特效演示
+            </h1>
+            <div class="flex space-x-2">
+                <button id="clear-btn" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-all duration-300 flex items-center gap-2">
+                    <i class="fa fa-trash-o"></i>
+                    <span>清除所有</span>
+                </button>
+                <button id="toggle-grid" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-all duration-300 flex items-center gap-2">
+                    <i class="fa fa-th"></i>
+                    <span>网格</span>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- 主内容区 -->
+    <main class="relative w-full h-screen overflow-hidden" id="click-area">
+        <!-- 网格背景 -->
+        <div id="grid-bg" class="absolute inset-0 opacity-10 pointer-events-none">
+            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                <pattern id="smallGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#4B5563" stroke-width="0.5"/>
+                </pattern>
+                <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
+                    <rect width="100" height="100" fill="url(#smallGrid)"/>
+                    <path d="M 100 0 L 0 0 0 100" fill="none" stroke="#4B5563" stroke-width="1"/>
+                </pattern>
+                <rect width="100%" height="100%" fill="url(#grid)"/>
+            </svg>
+        </div>
+        
+        <!-- 点击特效和标记将在这里动态生成 -->
+    </main>
+    
+    <!-- 底部信息 -->
+    <footer class="fixed bottom-0 left-0 right-0 z-10 bg-gray-900/80 backdrop-blur-md border-t border-gray-800">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="text-sm text-gray-400">
+                <span>点击任意位置添加标记</span>
+            </div>
+            <div class="flex space-x-4 text-sm text-gray-400">
+                <div class="flex items-center gap-1">
+                    <span class="w-3 h-3 rounded-full bg-primary inline-block"></span>
+                    <span>最近点击</span>
+                </div>
+                <div class="flex items-center gap-1">
+                    <span class="w-3 h-3 rounded-full bg-gray-400 inline-block"></span>
+                    <span>历史点击</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const clickArea = document.getElementById('click-area');
+            const clearBtn = document.getElementById('clear-btn');
+            const toggleGridBtn = document.getElementById('toggle-grid');
+            const gridBg = document.getElementById('grid-bg');
+            let clickCount = 0;
+            let lastMarker = null;
+            
+            // 切换网格显示
+            toggleGridBtn.addEventListener('click', () => {
+                gridBg.classList.toggle('opacity-10');
+                gridBg.classList.toggle('opacity-0');
+                toggleGridBtn.classList.toggle('bg-primary');
+                toggleGridBtn.querySelector('i').classList.toggle('fa-th');
+                toggleGridBtn.querySelector('i').classList.toggle('fa-th-large');
+            });
+            
+            // 清除所有标记
+            clearBtn.addEventListener('click', () => {
+                const markers = document.querySelectorAll('.marker');
+                markers.forEach(marker => {
+                    marker.classList.add('opacity-0');
+                    setTimeout(() => marker.remove(), 500);
+                });
+                clickCount = 0;
+                lastMarker = null;
+            });
+            
+            // 点击区域添加特效和标记
+            clickArea.addEventListener('click', (e) => {
+                // 阻止事件冒泡到 document
+                e.stopPropagation();
+                
+                // 获取点击位置相对于视口的坐标
+                const x = e.clientX;
+                const y = e.clientY;
+                
+                // 创建点击特效
+                createClickEffect(x, y);
+                
+                // 创建标记点
+                createMarker(x, y);
+            });
+            
+            // 创建点击闪光特效
+            function createClickEffect(x, y) {
+                const effect = document.createElement('div');
+                effect.className = 'absolute z-20 rounded-full bg-primary/30 border-2 border-primary/80 animate-shine pointer-events-none';
+                effect.style.width = '40px';
+                effect.style.height = '40px';
+                effect.style.left = `${x - 20}px`;
+                effect.style.top = `${y - 20}px`;
+                
+                clickArea.appendChild(effect);
+                
+                // 特效结束后移除元素
+                setTimeout(() => {
+                    effect.style.transition = 'opacity 0.5s ease-out';
+                    effect.style.opacity = '0';
+                    setTimeout(() => effect.remove(), 500);
+                }, 600);
+            }
+            
+            // 创建标记点
+            function createMarker(x, y) {
+                clickCount++;
+                
+                // 如果有上一个标记，将其颜色变为灰色
+                if (lastMarker) {
+                    lastMarker.classList.remove('bg-primary');
+                    lastMarker.classList.remove('glow');
+                    lastMarker.classList.add('bg-gray-500');
+                }
+                
+                const marker = document.createElement('div');
+                marker.className = 'absolute z-10 rounded-full bg-primary glow transition-all duration-500 pointer-events-none marker';
+                marker.style.width = '12px';
+                marker.style.height = '12px';
+                marker.style.left = `${x - 6}px`;
+                marker.style.top = `${y - 6}px`;
+                
+                // 添加标记序号
+                const label = document.createElement('div');
+                label.className = 'absolute -top-7 left-1/2 transform -translate-x-1/2 text-xs bg-gray-800/80 px-2 py-1 rounded whitespace-nowrap';
+                label.textContent = `#${clickCount}`;
+                marker.appendChild(label);
+                
+                clickArea.appendChild(marker);
+                lastMarker = marker;
+                
+                // 为标记添加点击事件，点击后显示坐标信息
+                marker.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showCoordinates(x, y, marker);
+                });
+            }
+            
+            // 显示坐标信息
+            function showCoordinates(x, y, marker) {
+                // 移除之前的坐标提示
+                const oldTips = document.querySelectorAll('.coordinate-tip');
+                oldTips.forEach(tip => tip.remove());
+                
+                const tip = document.createElement('div');
+                tip.className = 'absolute z-30 bg-gray-800/90 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg pointer-events-none coordinate-tip';
+                tip.textContent = `X: ${x}px, Y: ${y}px`;
+                
+                // 定位提示框，避免超出视口
+                let tipX = x + 20;
+                let tipY = y - 20;
+                
+                // 检查是否会超出右侧边界
+                if (tipX + 120 > window.innerWidth) {
+                    tipX = x - 140;
+                }
+                
+                // 检查是否会超出上边界
+                if (tipY < 0) {
+                    tipY = y + 20;
+                }
+                
+                tip.style.left = `${tipX}px`;
+                tip.style.top = `${tipY}px`;
+                
+                clickArea.appendChild(tip);
+                
+                // 3秒后移除提示
+                setTimeout(() => {
+                    tip.style.transition = 'opacity 0.3s ease-out';
+                    tip.style.opacity = '0';
+                    setTimeout(() => tip.remove(), 300);
+                }, 3000);
+            }
+            
+            // 监听窗口大小变化，调整标记位置
+            window.addEventListener('resize', () => {
+                const markers = document.querySelectorAll('.marker');
+                markers.forEach(marker => {
+                    // 这里简化处理，实际项目中可能需要重新计算相对位置
+                    // 或者使用相对于容器的定位方式
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+    
