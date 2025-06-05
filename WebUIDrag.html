@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全屏拖拽闪光特效</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#EC4899',
+                        accent: '#10B981',
+                        dark: '#1F2937',
+                        light: '#F9FAFB'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .particle {
+                position: absolute;
+                pointer-events: none;
+                border-radius: 50%;
+                opacity: 0;
+                animation: shine 0.8s ease-out forwards;
+            }
+            .trail {
+                position: absolute;
+                background-color: rgba(100, 100, 100, 0.8);
+                pointer-events: none;
+                height: 2px; /* 改为实线 */
+            }
+            .fixed-top-right {
+                position: fixed;
+                top: 2rem;
+                right: 2rem;
+                z-index: 50;
+            }
+        }
+
+        @keyframes shine {
+            0% {
+                transform: scale(0);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans overflow-hidden">
+    <!-- 重置按钮 -->
+    <button id="resetBtn" class="fixed-top-right bg-primary hover:bg-primary/90 text-white font-medium py-2 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/50 shadow-lg">
+        <i class="fa fa-refresh mr-2"></i>重置轨迹
+    </button>
+
+    <!-- 全屏拖拽区域 -->
+    <section id="drawingArea" class="relative w-full h-screen overflow-hidden">
+        <!-- 拖拽区域提示 -->
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-30">
+            <div class="text-center">
+                <i class="fa fa-arrows-alt text-6xl mb-4"></i>
+                <p class="text-xl font-medium">在屏幕内拖拽鼠标</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const drawingArea = document.getElementById('drawingArea');
+            const resetBtn = document.getElementById('resetBtn');
+            let isDragging = false;
+            let trails = [];
+            let lastTrailPosition = null; // 记录上一个轨迹点位置
+            
+            // 使用您提供的自定义颜色
+            const customColors = [
+              '#F3E5F5', '#E3F2FD', '#E8F5E9', '#F9FBE7', '#FFF3E0',
+              '#CE93D8', '#90CAF9', '#A5D6A7', '#E6EE9C', '#FFCC80',
+              '#AB47BC', '#42A5F5', '#66BB6A', '#D4E157', '#FFA726',
+              '#8E24AA', '#1E88E5', '#43A047', '#C0CA33', '#FB8C00',
+              '#6A1B9A', '#1565C0', '#2E7D32', '#558B2F', '#EF6C00'
+            ];
+            const positionColors = customColors;
+            
+            // 创建5x5的定位点网格
+            createPositionGrid();
+            
+            // 创建定位点网格
+            function createPositionGrid() {
+                const rows = 5;
+                const cols = 5;
+                
+                for (let row = 0; row < rows; row++) {
+                    for (let col = 0; col < cols; col++) {
+                        const index = row * cols + col;
+                        const xPercent = (col / (cols - 1)) * 100;
+                        const yPercent = (row / (rows - 1)) * 100;
+                        
+                        const positionElement = document.createElement('div');
+                        positionElement.id = `position${index + 1}`;
+                        
+                        // 直接设置背景颜色，而不是使用bg-前缀
+                        positionElement.className = `position-element absolute text-white w-8 h-8 rounded-full flex items-center justify-center shadow-lg transform transition-all hover:scale-110 cursor-pointer text-xs`;
+                        positionElement.style.backgroundColor = positionColors[index];
+                        
+                        positionElement.style.left = `${xPercent}%`;
+                        positionElement.style.top = `${yPercent}%`;
+                        positionElement.style.transform = 'translate(-50%, -50%)';
+                        positionElement.innerHTML = `<span class="font-bold">${index + 1}</span>`;
+                        
+                        drawingArea.appendChild(positionElement);
+                    }
+                }
+            }
+            
+            // 定位元素样式类
+            const positionElements = document.querySelectorAll('.position-element');
+            positionElements.forEach((el, index) => {
+                // 为每个元素添加不同的类
+                el.classList.add(`pos-${index + 1}`);
+                // 添加悬停提示
+                el.addEventListener('mouseenter', function() {
+                    this.setAttribute('title', `定位元素 ${index + 1}`);
+                });
+            });
+            
+            // 鼠标按下事件
+            drawingArea.addEventListener('mousedown', function(e) {
+                if (e.button === 0) { // 左键
+                    isDragging = true;
+                    lastTrailPosition = { x: e.clientX, y: e.clientY };
+                    createTrail(e.clientX, e.clientY);
+                }
+            });
+            
+            // 鼠标移动事件
+            document.addEventListener('mousemove', function(e) {
+                if (isDragging) {
+                    // 确保在绘图区域内
+                    const rect = drawingArea.getBoundingClientRect();
+                    const x = e.clientX;
+                    const y = e.clientY;
+                    
+                    // 稍微扩大边界检测范围，使拖拽到边缘时也能正常显示效果
+                    if (x >= -50 && x <= rect.width + 50 && y >= -50 && y <= rect.height + 50) {
+                        createTrail(lastTrailPosition.x, lastTrailPosition.y, x, y);
+                        createParticle(x, y);
+                        lastTrailPosition = { x, y };
+                    }
+                }
+            });
+            
+            // 鼠标释放事件
+            document.addEventListener('mouseup', function() {
+                isDragging = false;
+                lastTrailPosition = null;
+            });
+            
+            // 重置按钮事件
+            resetBtn.addEventListener('click', function() {
+                clearTrails();
+                // 添加按钮点击动画效果
+                this.classList.add('scale-95');
+                setTimeout(() => {
+                    this.classList.remove('scale-95');
+                }, 200);
+            });
+            
+            // 创建闪光粒子
+            function createParticle(x, y) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // 随机大小和颜色
+                const size = Math.random() * 10 + 5;
+                const hue = Math.random() * 360;
+                const lightness = 50 + Math.random() * 30;
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.backgroundColor = `hsla(${hue}, 100%, ${lightness}%, 0.8)`;
+                particle.style.left = `${x - size/2}px`;
+                particle.style.top = `${y - size/2}px`;
+                
+                drawingArea.appendChild(particle);
+                
+                // 动画结束后移除元素
+                setTimeout(() => {
+                    particle.remove();
+                }, 800);
+            }
+            
+            // 创建轨迹线
+            function createTrail(x1, y1, x2, y2) {
+                if (!x2 || !y2) return; // 如果没有第二个点，不创建线
+                
+                const trail = document.createElement('div');
+                trail.className = 'trail';
+                
+                // 计算线的长度和角度
+                const dx = x2 - x1;
+                const dy = y2 - y1;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                
+                trail.style.width = `${length}px`;
+                trail.style.left = `${x1}px`;
+                trail.style.top = `${y1}px`;
+                trail.style.transformOrigin = '0 50%';
+                trail.style.transform = `rotate(${angle}deg)`;
+                
+                drawingArea.appendChild(trail);
+                trails.push(trail);
+                
+                // 限制轨迹点数量，防止内存泄漏
+                if (trails.length > 500) {
+                    const oldTrail = trails.shift();
+                    if (oldTrail && oldTrail.parentNode === drawingArea) {
+                        drawingArea.removeChild(oldTrail);
+                    }
+                }
+            }
+            
+            // 清除所有轨迹
+            function clearTrails() {
+                trails.forEach(trail => {
+                    if (trail.parentNode === drawingArea) {
+                        drawingArea.removeChild(trail);
+                    }
+                });
+                trails = [];
+                
+                // 添加清除动画效果
+                const animation = document.createElement('div');
+                animation.className = 'absolute inset-0 bg-white/30 pointer-events-none';
+                animation.style.animation = 'fadeOut 0.5s ease-out forwards';
+                drawingArea.appendChild(animation);
+                
+                setTimeout(() => {
+                    animation.remove();
+                }, 500);
+            }
+            
+            // 添加淡入淡出动画
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fadeOut {
+                    0% { opacity: 1; }
+                    100% { opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>    
