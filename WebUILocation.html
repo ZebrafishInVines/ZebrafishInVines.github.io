@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全屏鼠标位置追踪</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        accent: '#8B5CF6',
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .grid-bg {
+                background-size: 20px 20px;
+                background-image: 
+                    linear-gradient(to right, rgba(156, 163, 175, 0.1) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(156, 163, 175, 0.1) 1px, transparent 1px);
+            }
+            .mouse-circle {
+                position: absolute;
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                border: 2px solid #3B82F6;
+                transform: translate(-50%, -50%);
+                pointer-events: none;
+                z-index: 50;
+                transition: all 0.1s ease-out;
+            }
+            .mouse-crosshair-x {
+                position: absolute;
+                height: 1px;
+                width: 100%;
+                background-color: rgba(59, 130, 246, 0.5);
+                pointer-events: none;
+                z-index: 40;
+            }
+            .mouse-crosshair-y {
+                position: absolute;
+                width: 1px;
+                height: 100%;
+                background-color: rgba(59, 130, 246, 0.5);
+                pointer-events: none;
+                z-index: 40;
+            }
+            .coordinate-display {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                color: rgba(255, 255, 255, 0.8);
+                font-size: 48px;
+                font-weight: bold;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+                pointer-events: none;
+                z-index: 100;
+                transition: all 0.1s ease-out;
+            }
+            .window-size-display {
+                position: fixed;
+                top: 1rem;
+                right: 1rem;
+                color: rgba(255, 255, 255, 0.8);
+                font-size: 18px;
+                font-weight: bold;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+                pointer-events: none;
+                z-index: 100;
+                background-color: rgba(0, 0, 0, 0.3);
+                padding: 0.5rem 1rem;
+                border-radius: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="font-inter bg-gray-50 min-h-screen m-0 p-0 overflow-hidden">
+    <div id="coordinate-system" class="absolute inset-0 grid-bg">
+        <div id="mouse-circle" class="mouse-circle hidden"></div>
+        <div id="mouse-crosshair-x" class="mouse-crosshair-x hidden"></div>
+        <div id="mouse-crosshair-y" class="mouse-crosshair-y hidden"></div>
+        <div id="coordinate-display" class="coordinate-display hidden">X: 0, Y: 0</div>
+        <div id="window-size-display" class="window-size-display">窗口大小: 0 × 0 像素</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const coordinateSystem = document.getElementById('coordinate-system');
+            const mouseCircle = document.getElementById('mouse-circle');
+            const mouseCrosshairX = document.getElementById('mouse-crosshair-x');
+            const mouseCrosshairY = document.getElementById('mouse-crosshair-y');
+            const coordinateDisplay = document.getElementById('coordinate-display');
+            const windowSizeDisplay = document.getElementById('window-size-display');
+            
+            // 更新窗口大小显示
+            function updateWindowSize() {
+                const width = window.innerWidth;
+                const height = window.innerHeight;
+                windowSizeDisplay.textContent = `窗口大小: ${width} × ${height} 像素`;
+            }
+            
+            // 初始更新窗口大小
+            updateWindowSize();
+            
+            // 窗口大小改变时更新
+            window.addEventListener('resize', updateWindowSize);
+            
+            // 鼠标移动事件处理
+            document.addEventListener('mousemove', (e) => {
+                // 显示所有指示器
+                mouseCircle.classList.remove('hidden');
+                mouseCrosshairX.classList.remove('hidden');
+                mouseCrosshairY.classList.remove('hidden');
+                coordinateDisplay.classList.remove('hidden');
+                
+                // 获取鼠标在窗口中的位置（整个页面）
+                const x = e.clientX;
+                const y = e.clientY;
+                
+                // 更新指示器位置
+                mouseCircle.style.left = `${x}px`;
+                mouseCircle.style.top = `${y}px`;
+                
+                mouseCrosshairX.style.top = `${y}px`;
+                mouseCrosshairY.style.left = `${x}px`;
+                
+                // 更新坐标显示（居中显示）
+                coordinateDisplay.textContent = `X: ${Math.round(x)}, Y: ${Math.round(y)}`;
+                
+                // 添加动画效果
+                mouseCircle.addEventListener('mouseenter', () => {
+                    mouseCircle.style.transform = 'translate(-50%, -50%) scale(1.2)';
+                    mouseCircle.style.borderColor = '#8B5CF6';
+                });
+                
+                mouseCircle.addEventListener('mouseleave', () => {
+                    mouseCircle.style.transform = 'translate(-50%, -50%) scale(1)';
+                    mouseCircle.style.borderColor = '#3B82F6';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+    
