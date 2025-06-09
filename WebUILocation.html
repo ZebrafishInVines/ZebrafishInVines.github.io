@@ -14,6 +14,7 @@
                         primary: '#3B82F6',
                         secondary: '#10B981',
                         accent: '#8B5CF6',
+                        target: '#EF4444',
                     },
                     fontFamily: {
                         inter: ['Inter', 'system-ui', 'sans-serif'],
@@ -87,6 +88,20 @@
                 padding: 0.5rem 1rem;
                 border-radius: 0.5rem;
             }
+            .target-point {
+                position: absolute;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background-color: #EF4444;
+                transform: translate(-50%, -50%);
+                z-index: 30;
+                transition: all 0.2s ease-out;
+            }
+            .target-point:hover {
+                box-shadow: 0 0 15px 5px rgba(239, 68, 68, 0.7);
+                transform: translate(-50%, -50%) scale(1.2);
+            }
         }
     </style>
 </head>
@@ -97,6 +112,7 @@
         <div id="mouse-crosshair-y" class="mouse-crosshair-y hidden"></div>
         <div id="coordinate-display" class="coordinate-display hidden">X: 0, Y: 0</div>
         <div id="window-size-display" class="window-size-display">窗口大小: 0 × 0 像素</div>
+        <div id="fixed-target" class="target-point" style="left: 100px; top: 100px;"></div>
     </div>
 
     <script>
