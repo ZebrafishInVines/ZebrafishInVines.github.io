@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网格按钮示例</title>
+    <style>
+        .grid-btn {
+            width: 100px;
+            height: 100px;
+            padding: 0;
+            font-size: 16px;
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+    <div id="buttonContainer" style="position: relative;"></div>
+
+    <script>
+        const container = document.getElementById('buttonContainer');
+
+        // 生成10×10的按钮网格
+        for (let row = 0; row < 10; row++) {
+            for (let col = 0; col < 10; col++) {
+                const btn = document.createElement('button');
+                const id = row * 10 + col + 1;
+                btn.id = `btn${id}`;
+                btn.className = 'grid-btn';
+                btn.textContent = id;
+                btn.style.left = `${col * 100}px`;
+                btn.style.top = `${row * 100}px`;
+                
+                // 为每个按钮添加点击事件
+                btn.addEventListener('click', function() {
+                    const x = col * 100;
+                    const y = row * 100;
+                    alert(`按钮位置：(${x}, ${y})`);
+                });
+                
+                container.appendChild(btn);
+            }
+        }
+    </script>
+</body>
+</html>
+    
