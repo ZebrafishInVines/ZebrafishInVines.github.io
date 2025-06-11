@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Alerts Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind CSS 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        accent: '#8B5CF6',
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <!-- 页面标题 -->
+        <h1 class="text-2xl font-bold text-center mb-8">JavaScript Alerts</h1>
+        
+        <!-- 按钮区域 -->
+        <div class="space-y-4">
+            <!-- Alert 按钮 -->
+            <button 
+                id="alertBtn" 
+                class="alert-btn w-full py-3 px-4 rounded-lg bg-primary text-white font-medium text-lg"
+                name="alert-button"
+                onclick="triggerAlert()">
+                Alert
+            </button>
+            
+            <!-- Confirm 按钮 -->
+            <button 
+                id="confirmBtn" 
+                class="confirm-btn w-full py-3 px-4 rounded-lg bg-secondary text-white font-medium text-lg"
+                name="confirm-button"
+                onclick="triggerConfirm()">
+                Confirm
+            </button>
+            
+            <!-- Prompt 按钮 -->
+            <button 
+                id="promptBtn" 
+                class="prompt-btn w-full py-3 px-4 rounded-lg bg-accent text-white font-medium text-lg"
+                name="prompt-button"
+                onclick="triggerPrompt()">
+                Prompt
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        // 触发 Alert 弹窗
+        function triggerAlert() {
+            alert("Alert");
+        }
+        
+        // 触发 Confirm 弹窗
+        function triggerConfirm() {
+            confirm("Confirm");
+        }
+        
+        // 触发 Prompt 弹窗
+        function triggerPrompt() {
+            prompt("Prompt", "Type here");
+        }
+    </script>
+</body>
+</html>
