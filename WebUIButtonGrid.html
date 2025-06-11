@@ -11,6 +11,19 @@
             padding: 0;
             font-size: 16px;
             position: absolute;
+            border: 1px solid #ddd;
+            background-color: #f0f0f0;
+            transition: all 0.2s;
+        }
+        
+        .grid-btn:hover {
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.7);
+            z-index: 1;
+        }
+        
+        .grid-btn.active {
+            background-color: #007bff;
+            color: white;
         }
     </style>
 </head>
@@ -36,6 +49,9 @@
                     const x = col * 100;
                     const y = row * 100;
                     alert(`按钮位置：(${x}, ${y})`);
+                    
+                    // 切换按钮的激活状态
+                    this.classList.toggle('active');
                 });
                 
                 container.appendChild(btn);
