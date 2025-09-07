@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>嵌套IFrame组展示</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 30px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(to right, #ffcc00, #ff6b6b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1.4rem;
+            max-width: 800px;
+            margin: 0 auto 20px;
+            color: #e0e0ff;
+        }
+        
+        .description {
+            max-width: 1000px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 12px;
+        }
+        
+        .instructions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .instruction-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .instruction-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .instruction-card i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #ffcc00;
+        }
+        
+        .color-sequence {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            gap: 15px;
+        }
+        
+        .color-box {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .iframes-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .iframe-group {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .iframe-group:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        }
+        
+        .group-title {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            font-size: 1.8rem;
+            color: #ffcc00;
+        }
+        
+        .iframe-wrapper {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .iframe-wrapper h3 {
+            margin-bottom: 10px;
+            text-align: center;
+            color: #4d96ff;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 250px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: white;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .highlight {
+            background: rgba(255, 215, 0, 0.3);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #ffcc00;
+        }
+        
+        @media (max-width: 768px) {
+            .iframes-container {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-sitemap"></i> 嵌套IFrame组展示</h1>
+            <p class="subtitle">三组嵌套IFrame结构，每组包含主IFrame和内部IFrame</p>
+            
+            <div class="description">
+                <p>此页面包含三组相同的嵌套IFrame结构，每组包含：</p>
+                <ul style="margin: 15px 0; padding-left: 20px;">
+                    <li>主IFrame（带有后缀：_first, _copy1, _copy2）</li>
+                    <li>主IFrame内的按钮（带有后缀：_first, _copy1, _copy2）</li>
+                    <li>内部IFrame（带有后缀：_second, _copy1_second, _copy2_second）</li>
+                    <li>内部IFrame内的按钮（带有后缀：_second, _copy1_second, _copy2_second）</li>
+                </ul>
+                <p>所有按钮在点击时会循环切换背景颜色（5种颜色循环）</p>
+            </div>
+            
+            <div class="color-sequence">
+                <div class="color-box" style="background-color: #ff6b6b;">1</div>
+                <div class="color-box" style="background-color: #4d96ff;">2</div>
+                <div class="color-box" style="background-color: #6bcb77;">3</div>
+                <div class="color-box" style="background-color: #ffd93d;">4</div>
+                <div class="color-box" style="background-color: #9c51e0;">5</div>
+            </div>
+        </header>
+        
+        <div class="instructions-grid">
+            <div class="instruction-card">
+                <i class="fas fa-copy"></i>
+                <h3>三组相同结构</h3>
+                <p>每组包含相同的嵌套IFrame结构，使用不同的后缀区分</p>
+            </div>
+            <div class="instruction-card">
+                <i class="fas fa-mouse-pointer"></i>
+                <h3>按钮颜色切换</h3>
+                <p>所有按钮点击一次改变一次颜色（5种颜色循环）</p>
+            </div>
+            <div class="instruction-card">
+                <i class="fas fa-tag"></i>
+                <h3>易于定位的name属性</h3>
+                <p>所有IFrame和按钮都有唯一的name属性</p>
+            </div>
+        </div>
+        
+        <div class="iframes-container">
+            <!-- 第一组：原始组 -->
+            <div class="iframe-group">
+                <h2 class="group-title">原始组 (无后缀)</h2>
+                
+                <div class="iframe-wrapper">
+                    <h3>主IFrame: <span class="highlight">IFrame_first</span></h3>
+                    <iframe name="IFrame_first" src="about:blank"></iframe>
+                </div>
+                
+                <div class="instruction-card">
+                    <p>主IFrame包含按钮: <span class="highlight">button_first</span></p>
+                    <p>和内部IFrame: <span class="highlight">IFrame_second</span></p>
+                </div>
+            </div>
+            
+            <!-- 第二组：副本1 -->
+            <div class="iframe-group">
+                <h2 class="group-title">副本组 1 (后缀_copy1)</h2>
+                
+                <div class="iframe-wrapper">
+                    <h3>主IFrame: <span class="highlight">IFrame_copy1</span></h3>
+                    <iframe name="IFrame_copy1" src="about:blank"></iframe>
+                </div>
+                
+                <div class="instruction-card">
+                    <p>主IFrame包含按钮: <span class="highlight">button_copy1</span></p>
+                    <p>和内部IFrame: <span class="highlight">IFrame_copy1_second</span></p>
+                </div>
+            </div>
+            
+            <!-- 第三组：副本2 -->
+            <div class="iframe-group">
+                <h2 class="group-title">副本组 2 (后缀_copy2)</h2>
+                
+                <div class="iframe-wrapper">
+                    <h3>主IFrame: <span class="highlight">IFrame_copy2</span></h3>
+                    <iframe name="IFrame_copy2" src="about:blank"></iframe>
+                </div>
+                
+                <div class="instruction-card">
+                    <p>主IFrame包含按钮: <span class="highlight">button_copy2</span></p>
+                    <p>和内部IFrame: <span class="highlight">IFrame_copy2_second</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 创建主IFrame的内容模板
+        function createMainIframeContent(prefix) {
+            return `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body {
+                            background-color: ${prefix === 'first' ? '#f0f8ff' : prefix === 'copy1' ? '#fff0f5' : '#f0fff0'};
+                            font-family: Arial, sans-serif;
+                            padding: 20px;
+                            text-align: center;
+                        }
+                        .container {
+                            max-width: 100%;
+                            margin: 0 auto;
+                        }
+                        h3 {
+                            color: #2c3e50;
+                            margin-bottom: 20px;
+                        }
+                        button {
+                            padding: 12px 25px;
+                            font-size: 16px;
+                            border: none;
+                            border-radius: 30px;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                            margin-bottom: 20px;
+                            font-weight: bold;
+                        }
+                        button:hover {
+                            transform: translateY(-3px);
+                            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+                        }
+                        .sub-iframe {
+                            background: rgba(255,255,255,0.7);
+                            border-radius: 10px;
+                            padding: 10px;
+                            height: 180px;
+                        }
+                        .instructions {
+                            background-color: ${prefix === 'first' ? '#e3f2fd' : prefix === 'copy1' ? '#fce4ec' : '#e8f5e9'};
+                            padding: 10px;
+                            border-radius: 8px;
+                            margin-top: 15px;
+                            font-size: 14px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h3>主IFrame: ${prefix}</h3>
+                        <button name="button_${prefix}">主按钮 (${prefix})</button>
+                        
+                        <div class="sub-iframe">
+                            <p>内部IFrame: ${prefix}_second</p>
+                            <iframe name="IFrame_${prefix}_second" src="about:blank"></iframe>
+                        </div>
+                        
+                        <div class="instructions">
+                            <p>点击按钮改变颜色，内部IFrame包含另一个按钮</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `;
+        }
+        
+        // 创建内部IFrame的内容模板
+        function createInnerIframeContent(prefix) {
+            return `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body {
+                            background-color: ${prefix === 'first' ? '#fff3e0' : prefix === 'copy1' ? '#e3f2fd' : '#ffecb3'};
+                            font-family: Arial, sans-serif;
+                            padding: 20px;
+                            text-align: center;
+                        }
+                        .container {
+                            max-width: 100%;
+                            margin: 0 auto;
+                        }
+                        h3 {
+                            color: #2c3e50;
+                            margin-bottom: 20px;
+                        }
+                        button {
+                            padding: 12px 25px;
+                            font-size: 16px;
+                            border: none;
+                            border-radius: 30px;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                            margin-top: 30px;
+                            font-weight: bold;
+                        }
+                        button:hover {
+                            transform: translateY(-3px);
+                            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+                        }
+                        .instructions {
+                            background-color: ${prefix === 'first' ? '#ffecb3' : prefix === 'copy1' ? '#e1f5fe' : '#f1f8e9'};
+                            padding: 10px;
+                            border-radius: 8px;
+                            margin-top: 15px;
+                            font-size: 14px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h3>内部IFrame: ${prefix}_second</h3>
+                        <p>此IFrame嵌套在主IFrame中</p>
+                        <button name="button_${prefix}_second">内部按钮 (${prefix}_second)</button>
+                        
+                        <div class="instructions">
+                            <p>点击按钮改变背景颜色</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `;
+        }
+        
+        // 设置颜色切换按钮的函数
+        function setupColorChangingButton(button) {
+            // 定义颜色序列
+            const colors = ['#ff6b6b', '#4d96ff', '#6bcb77', '#ffd93d', '#9c51e0'];
+            let currentColorIndex = 0;
+            
+            // 初始设置按钮颜色
+            button.style.backgroundColor = colors[currentColorIndex];
+            button.style.color = '#fff';
+            
+            // 添加点击事件
+            button.addEventListener('click', function() {
+                // 循环到下一个颜色
+                currentColorIndex = (currentColorIndex + 1) % colors.length;
+                button.style.backgroundColor = colors[currentColorIndex];
+                
+                // 添加动画效果
+                button.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    button.style.transform = 'scale(1)';
+                }, 150);
+            });
+        }
+        
+        // 当主页面加载完成后
+        document.addEventListener('DOMContentLoaded', function() {
+            // 要处理的组配置
+            const groups = [
+                { prefix: 'first', mainIframeName: 'IFrame_first' },
+                { prefix: 'copy1', mainIframeName: 'IFrame_copy1' },
+                { prefix: 'copy2', mainIframeName: 'IFrame_copy2' }
+            ];
+            
+            // 处理每个组
+            groups.forEach(group => {
+                // 获取主IFrame
+                const mainIframe = document.getElementsByName(group.mainIframeName)[0];
+                
+                // 写入主IFrame的内容
+                mainIframe.contentDocument.open();
+                mainIframe.contentDocument.write(createMainIframeContent(group.prefix));
+                mainIframe.contentDocument.close();
+                
+                // 当主IFrame加载完成后
+                mainIframe.onload = function() {
+                    // 获取内部IFrame
+                    const innerIframeName = `IFrame_${group.prefix}_second`;
+                    const innerIframe = mainIframe.contentDocument.getElementsByName(innerIframeName)[0];
+                    
+                    // 写入内部IFrame的内容
+                    innerIframe.contentDocument.open();
+                    innerIframe.contentDocument.write(createInnerIframeContent(group.prefix));
+                    innerIframe.contentDocument.close();
+                    
+                    // 当内部IFrame加载完成后
+                    innerIframe.onload = function() {
+                        // 为主IFrame中的按钮添加点击事件
+                        const mainButtonName = `button_${group.prefix}`;
+                        const mainButton = mainIframe.contentDocument.getElementsByName(mainButtonName)[0];
+                        setupColorChangingButton(mainButton);
+                        
+                        // 为内部IFrame中的按钮添加点击事件
+                        const innerButtonName = `button_${group.prefix}_second`;
+                        const innerButton = innerIframe.contentDocument.getElementsByName(innerButtonName)[0];
+                        setupColorChangingButton(innerButton);
+                    };
+                };
+            });
+        });
+    </script>
+    
+    <div class="footer">
+        <p>嵌套IFrame组展示 | 每组结构相同但使用不同后缀 | 所有元素都有易于定位的name属性</p>
+        <p><i class="fas fa-code"></i> 前端设计示例</p>
+    </div>
+</body>
+</html>
