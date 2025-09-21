@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>横向滚动按钮栏</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .scroll-container {
+            width: 80%;
+            max-width: 1000px;
+            margin: 20px auto;
+            position: relative;
+        }
+        
+        .scroll-hint {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .scroll-container:hover .scroll-hint {
+            opacity: 1;
+        }
+        
+        .button-row {
+            display: flex;
+            overflow-x: auto;
+            gap: 15px;
+            padding: 20px 10px;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+            cursor: grab;
+            scroll-behavior: smooth;
+        }
+        
+        .button-row::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera*/
+        }
+        
+        .button-row:active {
+            cursor: grabbing;
+        }
+        
+        .button {
+            flex: 0 0 auto;
+            padding: 15px 25px;
+            background: linear-gradient(145deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            min-width: 120px;
+            text-align: center;
+        }
+        
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(145deg, #2980b9, #3498db);
+        }
+        
+        .button:active {
+            transform: translateY(1px);
+        }
+        
+        .instructions {
+            max-width: 800px;
+            margin-top: 40px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .instructions h2 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        
+        .instructions p {
+            line-height: 1.6;
+            color: #34495e;
+        }
+        
+        @media (max-width: 768px) {
+            .scroll-container {
+                width: 95%;
+            }
+            
+            .button {
+                padding: 12px 20px;
+                font-size: 14px;
+                min-width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>横向滚动按钮栏</h1>
+    
+    <div class="scroll-container">
+        <div class="scroll-hint">使用鼠标滚轮横向滚动 →</div>
+        <div class="button-row">
+            <button class="button">首页</button>
+            <button class="button">产品介绍</button>
+            <button class="button">解决方案</button>
+            <button class="button">客户案例</button>
+            <button class="button">关于我们</button>
+            <button class="button">服务支持</button>
+            <button class="button">新闻动态</button>
+            <button class="button">招聘信息</button>
+            <button class="button">联系我们</button>
+            <button class="button">帮助中心</button>
+            <button class="button">文档资料</button>
+            <button class="button">常见问题</button>
+            <button class="button">更多功能</button>
+            <button class="button">高级设置</button>
+            <button class="button">会员中心</button>
+        </div>
+    </div>
+    
+    <div class="instructions">
+        <h2>使用说明</h2>
+        <p>将鼠标悬停在按钮栏上，然后使用鼠标滚轮进行横向滚动，查看隐藏的按钮。</p>
+        <p>你也可以直接拖动按钮栏进行横向滚动（在触摸设备上同样适用）。</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const buttonRow = document.querySelector('.button-row');
+            
+            // 监听鼠标滚轮事件
+            buttonRow.addEventListener('wheel', function(e) {
+                // 阻止默认的垂直滚动
+                e.preventDefault();
+                
+                // 计算横向滚动量，调整滚动速度
+                const scrollAmount = e.deltaY * 0.8;
+                
+                // 应用横向滚动
+                this.scrollLeft += scrollAmount;
+            });
+            
+            // 添加拖动功能
+            let isDown = false;
+            let startX;
+            let scrollLeft;
+            
+            buttonRow.addEventListener('mousedown', (e) => {
+                isDown = true;
+                buttonRow.style.cursor = 'grabbing';
+                startX = e.pageX - buttonRow.offsetLeft;
+                scrollLeft = buttonRow.scrollLeft;
+            });
+            
+            buttonRow.addEventListener('mouseleave', () => {
+                isDown = false;
+                buttonRow.style.cursor = 'grab';
+            });
+            
+            buttonRow.addEventListener('mouseup', () => {
+                isDown = false;
+                buttonRow.style.cursor = 'grab';
+            });
+            
+            buttonRow.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - buttonRow.offsetLeft;
+                const walk = (x - startX) * 2; // 滚动速度倍数
+                buttonRow.scrollLeft = scrollLeft - walk;
+            });
+        });
+    </script>
+</body>
+</html>

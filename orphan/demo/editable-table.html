@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Protobuf Type Mapping Table</title>
+  <!-- 引入Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 引入Font Awesome -->
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <!-- 引入Vue.js -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  <!-- 引入Element UI CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <!-- 引入Element UI JS -->
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  
+  <!-- 自定义Tailwind配置 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#409EFF', // Element UI的主色调
+          },
+        },
+      }
+    }
+  </script>
+  
+  <!-- 自定义工具类 -->
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .table-container {
+        box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen p-4 md:p-8">
+  <div id="app" class="max-w-7xl mx-auto">
+    <div class="bg-white rounded-lg p-6 table-container">
+      <h1 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+        <i class="fa fa-table text-primary mr-3"></i>
+        Protobuf Type Mapping Table
+      </h1>
+      
+      <div class="mb-4 flex flex-wrap justify-between items-center gap-4">
+        <p class="text-gray-600">Edit type mappings across different programming languages</p>
+        <el-button type="primary" @click="addRow" class="flex items-center">
+          <i class="fa fa-plus mr-2"></i> Add Row
+        </el-button>
+      </div>
+      
+      <el-table 
+        :data="tableData" 
+        border 
+        class="w-full mb-4"
+        :cell-style="{ 'padding': '8px 12px' }"
+        empty-text="No data available, click 'Add Row' to create a new row"
+      >
+        <!-- 循环生成表格列 -->
+        <el-table-column 
+          v-for="(column, index) in columns" 
+          :key="index" 
+          :label="column" 
+          :prop="column.toLowerCase().replace(/\s+/g, '_').replace(/\./g, '')"
+        >
+          <template slot-scope="scope">
+            <el-input 
+              v-model="scope.row[scope.column.property]" 
+              size="small"
+              placeholder="Enter value"
+              class="w-full"
+            ></el-input>
+          </template>
+        </el-table-column>
+        
+        <!-- 操作列 -->
+        <el-table-column label="Actions" width="100">
+          <template slot-scope="scope">
+            <el-button 
+              type="danger" 
+              icon="fa fa-trash-o" 
+              size="small" 
+              @click="deleteRow(scope.$index, tableData)"
+            ></el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      
+      <!-- 表格操作按钮区 -->
+      <div class="mt-4 flex flex-wrap justify-between items-center gap-4">
+        <el-button 
+          type="warning" 
+          @click="clearTable" 
+          class="flex items-center"
+          :disabled="tableData.length === 0"
+        >
+          <i class="fa fa-trash mr-2"></i> Clear All Rows
+        </el-button>
+        
+        <div class="text-sm text-gray-500 italic">
+          <i class="fa fa-info-circle mr-1"></i>
+          Note: You can delete all rows, leaving only the column headers
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data() {
+        return {
+          // 表格列标题
+          columns: ['.proto Type', 'Notes', 'C++', 'Java', 'Python', 'Go', 'C#', 'PHP', 'Ruby'],
+          // 表格数据 - 初始有一行空数据
+          tableData: [
+            {
+              proto_type: '',
+              notes: '',
+              c: '',
+              java: '',
+              python: '',
+              go: '',
+              c_sharp: '',
+              php: '',
+              ruby: ''
+            }
+          ]
+        };
+      },
+      methods: {
+        // 添加新行
+        addRow() {
+          this.tableData.push({
+            proto_type: '',
+            notes: '',
+            c: '',
+            java: '',
+            python: '',
+            go: '',
+            c_sharp: '',
+            php: '',
+            ruby: ''
+          });
+          
+          // 滚动到最后一行
+          this.$nextTick(() => {
+            const table = document.querySelector('.el-table__body-wrapper');
+            if (table) table.scrollTop = table.scrollHeight;
+          });
+        },
+        // 删除行
+        deleteRow(index, rows) {
+          this.$confirm('Are you sure you want to delete this row?', 'Confirm', {
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No',
+            type: 'warning'
+          }).then(() => {
+            rows.splice(index, 1);
+            this.$message({
+              type: 'success',
+              message: 'Row deleted successfully'
+            });
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: 'Deletion canceled'
+            });
+          });
+        },
+        // 清空表格
+        clearTable() {
+          if (this.tableData.length === 0) {
+            this.$message({
+              type: 'info',
+              message: 'Table is already empty'
+            });
+            return;
+          }
+          
+          this.$confirm('Are you sure you want to clear all rows?', 'Confirm', {
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No',
+            type: 'warning'
+          }).then(() => {
+            this.tableData = [];
+            this.$message({
+              type: 'success',
+              message: 'All rows cleared successfully'
+            });
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: 'Clear canceled'
+            });
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

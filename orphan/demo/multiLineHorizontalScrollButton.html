@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多行横向滚动按钮组</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .scroll-row {
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        .row-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+        
+        .row-title i {
+            margin-right: 10px;
+            font-size: 1.6rem;
+        }
+        
+        .button-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 15px;
+            padding: 15px 10px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            scroll-behavior: smooth;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .button-container::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .button {
+            flex: 0 0 auto;
+            padding: 18px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 150px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .button i {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+        
+        .button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .button:active {
+            transform: translateY(0);
+        }
+        
+        /* 行为1 - 蓝色系 */
+        .row-1 .button {
+            background: linear-gradient(145deg, #3498db, #2980b9);
+            color: white;
+        }
+        
+        /* 行为2 - 红色系 */
+        .row-2 .button {
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+            color: white;
+        }
+        
+        /* 行为3 - 绿色系 */
+        .row-3 .button {
+            background: linear-gradient(145deg, #2ecc71, #27ae60);
+            color: white;
+        }
+        
+        /* 行为4 - 紫色系 */
+        .row-4 .button {
+            background: linear-gradient(145deg, #9b59b6, #8e44ad);
+            color: white;
+        }
+        
+        /* 行为5 - 橙色系 */
+        .row-5 .button {
+            background: linear-gradient(145deg, #f39c12, #e67e22);
+            color: white;
+        }
+        
+        /* 行为6 - 深色系 */
+        .row-6 .button {
+            background: linear-gradient(145deg, #34495e, #2c3e50);
+            color: white;
+        }
+        
+        /* 行为7 - 粉色系 */
+        .row-7 .button {
+            background: linear-gradient(145deg, #fd79a8, #e84393);
+            color: white;
+        }
+        
+        .scroll-hint {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .scroll-hint i {
+            margin-right: 5px;
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 40px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .instructions h2 {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .instructions h2 i {
+            margin-right: 10px;
+        }
+        
+        .instructions p {
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .button {
+                padding: 15px 20px;
+                min-width: 130px;
+                font-size: 14px;
+            }
+            
+            .button i {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>多行横向滚动按钮组</h1>
+            <p class="subtitle">将鼠标悬停在任意一行上，使用鼠标滚轮横向滚动查看所有按钮</p>
+        </header>
+        
+        <main>
+            <!-- 第1行 -->
+            <div class="scroll-row row-1">
+                <div class="row-title">
+                    <i class="fas fa-desktop"></i>
+                    <span>技术设备</span>
+                </div>
+                <div class="button-container">
+                    <button class="button"><i class="fas fa-laptop"></i>笔记本电脑</button>
+                    <button class="button"><i class="fas fa-mobile-alt"></i>智能手机</button>
+                    <button class="button"><i class="fas fa-tablet-alt"></i>平板电脑</button>
+                    <button class="button"><i class="fas fa-headphones"></i>耳机</button>
+                    <button class="button"><i class="fas fa-keyboard"></i>键盘</button>
+                    <button class="button"><i class="fas fa-mouse"></i>鼠标</button>
+                    <button class="button"><i class="fas fa-tv"></i>显示器</button>
+                    <button class="button"><i class="fas fa-microchip"></i>处理器</button>
+                    <button class="button"><i class="fas fa-memory"></i>内存条</button>
+                    <button class="button"><i class="fas fa-hdd"></i>硬盘</button>
+                </div>
+                <div class="scroll-hint">
+                    <i class="fas fa-mouse"></i> 滚动浏览
+                </div>
+            </div>
+            
+            <!-- 第2行 -->
+            <div class="scroll-row row-2">
+                <div class="row-title">
+                    <i class="fas fa-utensils"></i>
+                    <span>美食餐饮</span>
+                </div>
+                <div class="button-container">
+                    <button class="button"><i class="fas fa-pizza-slice"></i>披萨</button>
+                    <button class="button"><i class="fas fa-hamburger"></i>汉堡</button>
+                    <button class="button"><i class="fas fa-ice-cream"></i>冰淇淋</button>
+                    <button class="button"><i class="fas fa-coffee"></i>咖啡</button>
+                    <button class="button"><i class="fas fa-cocktail"></i>鸡尾酒</button>
+                    <button class="button"><i class="fas fa-cookie"></i>甜点</button>
+                    <button class="button"><i class="fas fa-drumstick-bite"></i>烤肉</button>
+                    <button class="button"><i class="fas fa-fish"></i>海鲜</button>
+                    <button class="button"><i class="fas fa-cheese"></i>奶酪</button>
+                    <button class="button"><i class="fas fa-bread-slice"></i>面包</button>
+                </div>
+                <div class="scroll-hint">
+                    <i class="fas fa-mouse"></i> 滚动浏览
+                </div>
+            </div>
+            
+            <!-- 第3行 -->
+            <div class="scroll-row row-3">
+                <div class="row-title">
+                    <i class="fas fa-heartbeat"></i>
+                    <span>健康健身</span>
+                </div>
+                <div class="button-container">
+                    <button class="button"><i class="fas fa-running"></i>跑步</button>
+                    <button class="button"><i class="fas fa-dumbbell"></i>举重</button>
+                    <button class="button"><i class="fas fa-bicycle"></i>骑行</button>
+                    <button class="button"><i class="fas fa-swimmer"></i>游泳</button>
+                    <button class="button"><i class="fas fa-hiking"></i>徒步</button>
+                    <button class="button"><i class="fas fa-spa"></i>瑜伽</button>
+                    <button class="button"><i class="fas fa-apple-alt"></i>饮食</button>
+                    <button class="button"><i class="fas fa-bed"></i>睡眠</button>
+                    <button class="button"><i class="fas fa-weight"></i>体重管理</button>
+                    <button class="button"><i class="fas fa-first-aid"></i>急救</button>
+                </div>
+                <div class="scroll-hint">
+                    <i class="fas fa-mouse"></i> 滚动浏览
+                </div>
+            </div>
+            
+            <!-- 第4行 -->
+            <div class="scroll-row row-4">
+                <div class="row-title">
+                    <i class="fas fa-globe-americas"></i>
+                    <span>旅行探索</span>
+                </div>
+                <div class="button-container">
+                    <button class="button"><i class="fas fa-mountain"></i>登山</button>
+                    <button class="button"><i class="fas fa-umbrella-beach"></i>海滩</button>
+                    <button class="button"><i class="fas fa-hotel"></i>酒店</button>
+                    <button class="button"><i class="fas fa-plane"></i>飞行</button>
+                    <button class="button"><i class="fas fa-map-marked-alt"></i>导航</button>
+                    <button class="button"><i class="fas fa-camera"></i>摄影</button>
+                    <button class="button"><i class="fas fa-passport"></i>签证</button>
+                    <button class="button"><i class="fas fa-language"></i>语言</button>
+                    <button class="button"><i class="fas fa-money-bill-wave"></i>货币</button>
+                    <button class="button"><i class="fas fa-train"></i>铁路</button>
+                </div>
+                <div class="scroll-hint">
+                    <i class="fas fa-mouse"></i> 滚动浏览
+                </div>
+            </div>
+            
+            <!-- 第5行 -->
+            <div class="scroll-row row-5">
+                <div class="row-title">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>教育学习</span>
+                </div>
+                <div class="button-container">
+                    <button class="button"><i class="fas fa-book"></i>阅读</button>
+                    <button class="button"><i class="fas fa-pencil-alt"></i>写作</button>
+                    <button class="button"><i class="fas fa-calculator"></i>数学</button>
+                    <button class="button"><i class="fas fa-flask"></i>科学</button>
+                    <button class="button"><i class="fas fa-code"></i>编程</button>
+                    <button class="button"><i class="fas fa-history"></i>历史</button>
+                    <button class="button"><i class="fas fa-music"></i>音乐</button>
+                    <button class="button"><i class="fas fa-paint-brush"></i>艺术</button>
+                    <button class="button"><i class="fas fa-chalkboard-teacher"></i>在线课程</button>
+                    <button class="button"><i class="fas fa-certificate"></i>证书</button>
+                </div>
+                <div class="scroll-hint">
+                    <i class="fas fa-mouse"></i> 滚动浏览
+                </div>
+            </div>
+            
+            <!-- 第6行 -->
+            <div class="scroll-row row-6">
+                <div class="row-title">
+                    <i class="fas fa-gamepad"></i>
+                    <span>娱乐游戏</span>
+                </div>
+                <div class="button-container">
+                    <button class="button"><i class="fas fa-dice"></i>棋牌</button>
+                    <button class="button"><i class="fas fa-puzzle-piece"></i>解谜</button>
+                    <button class="button"><i class="fas fa-chess"></i>策略</button>
+                    <button class="button"><i class="fas fa-running"></i>动作</button>
+                    <button class="button"><i class="fas fa-car"></i>竞速</button>
+                    <button class="button"><i class="fas fa-baseball-ball"></i>体育</button>
+                    <button class="button"><i class="fas fa-vr-cardboard"></i>VR游戏</button>
+                    <button class="button"><i class="fas fa-headset"></i>电竞</button>
+                    <button class="button"><i class="fas fa-dragon"></i>角色扮演</button>
+                    <button class="button"><i class="fas fa-ghost"></i>恐怖</button>
+                </div>
+                <div class="scroll-hint">
+                    <i class="fas fa-mouse"></i> 滚动浏览
+                </div>
+            </div>
+            
+            <!-- 第7行 -->
+            <div class="scroll-row row-7">
+                <div class="row-title">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>购物消费</span>
+                </div>
+                <div class="button-container">
+                    <button class="button"><i class="fas fa-tshirt"></i>服装</button>
+                    <button class="button"><i class="fas fa-shoe-prints"></i>鞋类</button>
+                    <button class="button"><i class="fas fa-gem"></i>珠宝</button>
+                    <button class="button"><i class="fas fa-mobile-alt"></i>电子产品</button>
+                    <button class="button"><i class="fas fa-couch"></i>家具</button>
+                    <button class="button"><i class="fas fa-utensils"></i>厨具</button>
+                    <button class="button"><i class="fas fa-heart"></i>美妆</button>
+                    <button class="button"><i class="fas fa-baby"></i>母婴</button>
+                    <button class="button"><i class="fas fa-tools"></i>工具</button>
+                    <button class="button"><i class="fas fa-car"></i>汽车用品</button>
+                </div>
+                <div class="scroll-hint">
+                    <i class="fas fa-mouse"></i> 滚动浏览
+                </div>
+            </div>
+        </main>
+        
+        <div class="instructions">
+            <h2><i class="fas fa-info-circle"></i>使用说明</h2>
+            <p>• 将鼠标悬停在任意按钮行上，使用鼠标滚轮进行横向滚动</p>
+            <p>• 每行按钮都有不同的颜色主题，方便区分不同类别</p>
+            <p>• 点击任意按钮可以查看该类别详情（示例中未实现具体功能）</p>
+            <p>• 在触摸设备上，可以直接滑动滚动按钮行</p>
+        </div>
+        
+        <footer>
+            <p>© 2023 横向滚动按钮组设计 | 使用CSS和JavaScript实现</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取所有按钮容器
+            const buttonContainers = document.querySelectorAll('.button-container');
+            
+            // 为每个容器添加滚动事件监听
+            buttonContainers.forEach(container => {
+                // 监听鼠标滚轮事件
+                container.addEventListener('wheel', function(e) {
+                    // 阻止默认的垂直滚动
+                    e.preventDefault();
+                    
+                    // 计算横向滚动量，调整滚动速度
+                    const scrollAmount = e.deltaY * 0.8;
+                    
+                    // 应用横向滚动
+                    this.scrollLeft += scrollAmount;
+                });
+                
+                // 添加拖动功能
+                let isDown = false;
+                let startX;
+                let scrollLeft;
+                
+                container.addEventListener('mousedown', (e) => {
+                    isDown = true;
+                    container.style.cursor = 'grabbing';
+                    startX = e.pageX - container.offsetLeft;
+                    scrollLeft = container.scrollLeft;
+                });
+                
+                container.addEventListener('mouseleave', () => {
+                    isDown = false;
+                    container.style.cursor = 'grab';
+                });
+                
+                container.addEventListener('mouseup', () => {
+                    isDown = false;
+                    container.style.cursor = 'grab';
+                });
+                
+                container.addEventListener('mousemove', (e) => {
+                    if (!isDown) return;
+                    e.preventDefault();
+                    const x = e.pageX - container.offsetLeft;
+                    const walk = (x - startX) * 2;
+                    container.scrollLeft = scrollLeft - walk;
+                });
+            });
+        });
+    </script>
+</body>
+</html>
