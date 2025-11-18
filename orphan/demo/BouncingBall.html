@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>弹跳小球游戏</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f0f4f8;
+            font-family: Arial, sans-serif;
+        }
+        
+        .game-container {
+            position: relative;
+        }
+        
+        #gameCanvas {
+            border: 2px solid #333;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            color: #333;
+            font-size: 18px;
+            text-align: center;
+        }
+        
+        .info {
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <canvas id="gameCanvas" width="600" height="400"></canvas>
+    </div>
+    <div class="instructions">按住空格键蓄力，松开弹起小球！</div>
+    <div class="info">小球受重力影响，弹力较小，不会飞出画面</div>
+
+    <script>
+        // 获取Canvas元素和上下文
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 小球对象 - 调整初始位置为距离地面较近的位置
+        const ball = {
+            x: canvas.width / 2,
+            y: 300, // 距离地面更近（地面在350位置，半径15，实际间距35）
+            radius: 15,
+            speedX: 0, // 新增水平速度，用于边界碰撞
+            speedY: 0,
+            originalY: 300,  // 初始悬浮位置（靠近地面）
+            isPressing: false,
+            color: '#4a90e2'
+        };
+        
+        // 地面对象
+        const ground = {
+            y: canvas.height - 50,  // 地面位置保持不变
+            color: '#333',
+            thickness: 3
+        };
+        
+        // 物理参数调整：增大重力、减小弹力
+        const physics = {
+            gravity: 0.5,           // 重力增大（原0.2）
+            pressForce: 0.3,        // 按压力度保持不变
+            maxPressTime: 1500,     // 最大按键时长保持不变
+            restitution: 0.3,       // 弹力减小（原0.85）
+            damping: 0.99,          // 阻尼系数略调，让运动更稳定
+            returnForce: 0.08       // 回归力略增，配合重力
+        };
+        
+        // 按键时间变量
+        let startPressTime = 0;
+        
+        // 初始化游戏
+        function init() {
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // 绘制地面
+        function drawGround() {
+            ctx.beginPath();
+            ctx.moveTo(0, ground.y);
+            ctx.lineTo(canvas.width, ground.y);
+            ctx.strokeStyle = ground.color;
+            ctx.lineWidth = ground.thickness;
+            ctx.stroke();
+        }
+        
+        // 绘制小球
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fillStyle = ball.isPressing ? '#e74c3c' : ball.color;
+            ctx.fill();
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+        
+        // 更新游戏状态 - 新增边界限制逻辑
+        function update() {
+            // 应用阻尼
+            ball.speedY *= physics.damping;
+            ball.speedX *= physics.damping; // 水平速度也应用阻尼
+            
+            // 处理按压状态
+            if (ball.isPressing) {
+                ball.speedY += physics.pressForce;
+            } else {
+                // 增大的重力效果
+                ball.speedY += physics.gravity;
+                
+                // 回归初始位置的力
+                if (Math.abs(ball.y - ball.originalY) < 50 && Math.abs(ball.speedY) < 1) {
+                    const distance = ball.originalY - ball.y;
+                    ball.speedY += distance * physics.returnForce;
+                }
+            }
+            
+            // 边界碰撞检测（防止飞出画框）
+            // 下边界（地面）
+            if (ball.y + ball.radius > ground.y) {
+                ball.y = ground.y - ball.radius;
+                ball.speedY = -ball.speedY * physics.restitution; // 减小的弹力效果
+            }
+            // 上边界
+            if (ball.y - ball.radius < 0) {
+                ball.y = ball.radius;
+                ball.speedY = -ball.speedY * physics.restitution;
+            }
+            // 左边界
+            if (ball.x - ball.radius < 0) {
+                ball.x = ball.radius;
+                ball.speedX = -ball.speedX * physics.restitution;
+            }
+            // 右边界
+            if (ball.x + ball.radius > canvas.width) {
+                ball.x = canvas.width - ball.radius;
+                ball.speedX = -ball.speedX * physics.restitution;
+            }
+            
+            // 更新小球位置（包含水平位置）
+            ball.y += ball.speedY;
+            ball.x += ball.speedX;
+        }
+        
+        // 游戏主循环
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            update();
+            drawGround();
+            drawBall();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // 事件监听 - 按键按下
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && !ball.isPressing) {
+                ball.isPressing = true;
+                startPressTime = Date.now();
+                e.preventDefault();
+            }
+        });
+        
+        // 事件监听 - 按键松开
+        function handleRelease() {
+            ball.isPressing = false;
+            const pressDuration = Math.min(
+                Date.now() - startPressTime, 
+                physics.maxPressTime
+            );
+            // 调整弹射力度计算，避免因重力增大导致失衡
+            const force = pressDuration * 0.2;
+            ball.speedY = -force;
+            
+            // 增加轻微水平随机性，让游戏更有趣
+            ball.speedX = (Math.random() - 0.5) * (pressDuration / 500);
+        }
+        
+        document.addEventListener('keyup', (e) => {
+            if (e.code === 'Space' && ball.isPressing) {
+                handleRelease();
+                e.preventDefault();
+            }
+        });
+        
+        // 触摸设备支持
+        canvas.addEventListener('touchstart', (e) => {
+            if (!ball.isPressing) {
+                ball.isPressing = true;
+                startPressTime = Date.now();
+                e.preventDefault();
+            }
+        });
+        
+        canvas.addEventListener('touchend', (e) => {
+            if (ball.isPressing) {
+                handleRelease();
+                e.preventDefault();
+            }
+        });
+        
+        // 启动游戏
+        init();
+    </script>
+</body>
+</html>
